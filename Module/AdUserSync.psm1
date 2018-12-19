@@ -5,14 +5,12 @@ function Get-AdUserDefaultPassword {
     #     [ValidateNotNullOrEmpty()]
     #     [string]$FilePath = "$($PSScriptRoot | Split-Path -Parent)\Artifacts\DefaultUserPassword.xml"
     # )
-
-    # echo "here!"
-
+    # echo "Here!"
     # ## To save a new password, do this: Get-Credential -UserName 'DOESNOTMATTER' | Export-CliXml $defaultPasswordXmlFile
     # Write-Verbose -Message "Reading default password from [$FilePath]..."
     # $defaultCredential = Import-CliXml -Path $FilePath
     # $defaultPassword = $defaultCredential.GetNetworkCredential().Password
-    $defaultPassword =  "Encr1pt4d012"
+    $defaultPassword = "Encr1pt4d012"
     ConvertTo-SecureString -String $defaultPassword -AsPlainText -Force
 }
 
@@ -195,8 +193,7 @@ function New-CompanyAdUser {
         Enabled = $true
         ChangePasswordAtLogon = $true
     }
-    
-    Write-Output -Message "Creating the new user account [$($Username)]..."
+    Write-Verbose -Message "Creating the new user account [$($Username)]..."
     New-AdUser @newUserParams
 
     #Write-Output "HERE!"
