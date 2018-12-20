@@ -276,7 +276,7 @@ InModuleScope 'AdUserSync' {
         } 
 
         it 'returns the expected OU path' {
-                $result | should be 'OU=departmentHere,DC=mylab,DC=local'
+                $result | should be 'OU=departmentHere,DC=demolab,DC=com'
         }
     }
 

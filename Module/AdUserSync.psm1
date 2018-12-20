@@ -39,15 +39,10 @@ function Get-ActiveEmployee {
 }
 
 function Get-InactiveEmployee {
-    [CmdletBinding()]
-    param (
-        [Parameter()]
-        [ValidateNotNullOrEmpty()]
-        [pscustomobject[]]$ActiveEmployee = (Get-ActiveEmployee)
-    )
-    
-    $adUsers = Get-ADuser -Filter "Enabled -eq 'True' -and SamAccountName -ne 'Administrator'"
-    $adUsers.where({ $_.samAccountName -notin $ActiveEmployee.ADUsername })
+    $DaysInactive = 90
+    $time = (Get-Date).Adddays(-($DaysInactive))
+    $adUsers = Get-ADUser -Filter {LastLogonTimeStamp -lt $time -and enabled -eq $true}
+    $adUsers 
     
 }
 
