@@ -17,7 +17,6 @@ if (-not $activeEmployees) {
     throw 'No employees found in CSV file'
 }
 
-
 foreach ($emp in $activeEmployees) {
     try {
         if (Test-ADUserExists -Username $emp.ADUsername) {
@@ -37,18 +36,8 @@ foreach ($emp in $activeEmployees) {
             } else {
                 Write-Verbose -Message "The username [$($emp.ADUsername)] is already a member of group [$($emp.Department)]."
             }
-
         }
     } catch {
         Write-Error -Message $_.Exception.Message
     }
-}
-
-if ($inactiveEmployees = Get-InactiveEmployee) { 
-    foreach ($emp in $inactiveEmployees) {
-        Write-Verbose -Message "Disabling inactive AD user [$($emp.ADUsername)]"
-        Disable-AdAccount -Identity $emp.ADUserName
-    }
-} else {
-    Write-Verbose -Message "Found no inactive employees in AD."
 }

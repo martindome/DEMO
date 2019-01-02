@@ -67,9 +67,6 @@ describe 'Sync-AdUser - Failure Tests' {
         ## Mocking Write-Warning here just because we need to assert it
         mock 'Write-Warning'
 
-        ## This has to be mocked because I don't want the script to do anything else after the user test.
-        mock 'Get-InactiveEmployee'
-
         ## No need to see the output here since we're just asserting a command is called.
         $null = & $scriptFilePath
 
@@ -98,8 +95,6 @@ describe 'Sync-AdUser - Failure Tests' {
         mock 'Test-ADOrganizationalUnitExists' {
             $false
         }
-
-        mock 'Get-InactiveEmployee'
 
         it 'when an OU does not exist, it should throw an exception' {
 
@@ -131,8 +126,6 @@ describe 'Sync-AdUser - Failure Tests' {
         mock 'Test-AdGroupExists' {
             $false
         }
-
-        mock 'Get-InactiveEmployee'
 
         it ' it should throw an exception' {
             
@@ -173,8 +166,6 @@ describe 'Sync-AdUser - user account creation' {
     mock 'Test-AdGroupExists' {
         $true
     }
-
-    mock 'Get-InactiveEmployee'
 
     ## not worried about the output again. Just execute the script. We'll check command assertions below.
     $null = & $scriptFilePath
@@ -268,8 +259,6 @@ describe 'Sync-AdUser - group member tests' {
     }
 
     mock 'New-CompanyAdUser'
-
-    mock 'Get-InactiveEmployee'
     
     ## This is less accurate but an example of what you can do if you just want to test total number of calls to a function.
     it 'when an account does not exist in the department group, it should add the account to that group' {
@@ -308,81 +297,4 @@ describe 'Sync-AdUser - group member tests' {
         Assert-MockCalled @assMParams
 
     }
-}
-
-describe 'Sync-AdUser - inactive employee tests' {
-
-     mock 'Get-ActiveEmployee' {
-        $getActiveEmployeeOutput
-    }
-
-    mock 'Test-ADUserExists' {
-        $true
-    }
-
-    mock 'Test-ADOrganizationalUnitExists' {
-        $true
-    }
-
-    mock 'Test-AdGroupExists' {
-        $true
-    }
-
-    ## This is what we're testing around now
-    mock 'Add-ADGroupMember'
-
-    mock 'New-CompanyAdUser'
-
-    mock 'Get-AdUserDefaultPassword' {
-        (ConvertTo-SecureString -String 'foo' -AsPlainText -Force)
-    }
-
-    mock 'Disable-AdAccount'
-
-    mock 'Write-Warning'
-
-    ## Here I'm using contexts to create two mock scopes. I do this because I need to mock Get-InactiveEmployee to return
-    ## two different outputs
-    context 'No inactive employees' {
-
-        mock 'Get-InactiveEmployee'
-
-        $null = & $scriptFilePath
-
-        it 'when there are no inactive employees it should do nothing' {
-        
-            $assMParams = @{
-                CommandName = 'Disable-AdAccount'
-                Times = 0
-                Exactly = $true
-            }
-            Assert-MockCalled @assMParams
-
-        }
-    }
-
-    context 'Active employees' {
-
-        mock 'Get-InactiveEmployee' {
-            $getInActiveEmployeeOutput
-        }
-
-        $null = & $scriptFilePath
-
-        it 'should call Disable-AdAccount with the expected parameters for each inactive employee' {
-
-            foreach ($emp in $getInActiveEmployeeOutput) {
-
-                $assMParams = @{
-                    CommandName = 'Disable-AdAccount'
-                    Times = 1
-                    Exactly = $true
-                    #ParameterFilter = { $Identity -eq $emp.ADUserName }
-                }
-                Assert-MockCalled @assMParams
-
-            }
-        }
-    }
-    
 }
